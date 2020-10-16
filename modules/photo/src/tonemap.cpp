@@ -66,7 +66,10 @@ public:
 
         Mat src = _src.getMat();
         CV_Assert(!src.empty());
-        _dst.create(src.size(), CV_32FC3);
+		if (src.channels() == 1)
+			_dst.create(src.size(), CV_32FC1);
+		else
+			_dst.create(src.size(), CV_32FC3);
         Mat dst = _dst.getMat();
 
         double min, max;
@@ -124,14 +127,20 @@ public:
 
         Mat src = _src.getMat();
         CV_Assert(!src.empty());
-        _dst.create(src.size(), CV_32FC3);
+		if(src.channels() == 1)
+			_dst.create(src.size(), CV_32FC1);
+		else
+			_dst.create(src.size(), CV_32FC3);
         Mat img = _dst.getMat();
 
         Ptr<Tonemap> linear = createTonemap(1.0f);
         linear->process(src, img);
 
         Mat gray_img;
-        cvtColor(img, gray_img, COLOR_RGB2GRAY);
+		if (img.channels() == 1)
+			gray_img = img;
+		else
+			cvtColor(img, gray_img, COLOR_RGB2GRAY);
         Mat log_img;
         log_(gray_img, log_img);
         float mean = expf(static_cast<float>(sum(log_img)[0]) / log_img.total());
@@ -211,13 +220,19 @@ public:
 
         Mat src = _src.getMat();
         CV_Assert(!src.empty());
-        _dst.create(src.size(), CV_32FC3);
+		if (src.channels() == 1)
+			_dst.create(src.size(), CV_32FC1);
+		else
+			_dst.create(src.size(), CV_32FC3);
         Mat img = _dst.getMat();
         Ptr<Tonemap> linear = createTonemap(1.0f);
         linear->process(src, img);
 
         Mat gray_img;
-        cvtColor(img, gray_img, COLOR_RGB2GRAY);
+		if (img.channels() == 1)
+			gray_img = img;
+		else
+			cvtColor(img, gray_img, COLOR_RGB2GRAY);
         Mat log_img;
         log_(gray_img, log_img);
         Mat map_img;
@@ -298,13 +313,19 @@ public:
 
         Mat src = _src.getMat();
         CV_Assert(!src.empty());
-        _dst.create(src.size(), CV_32FC3);
+		if (src.channels() == 1)
+			_dst.create(src.size(), CV_32FC1);
+		else
+			_dst.create(src.size(), CV_32FC3);
         Mat img = _dst.getMat();
         Ptr<Tonemap> linear = createTonemap(1.0f);
         linear->process(src, img);
 
         Mat gray_img;
-        cvtColor(img, gray_img, COLOR_RGB2GRAY);
+		if (img.channels() == 1)
+			gray_img = img;
+		else
+			cvtColor(img, gray_img, COLOR_RGB2GRAY);
         Mat log_img;
         log_(gray_img, log_img);
 
@@ -319,10 +340,11 @@ public:
         Scalar chan_mean = mean(img);
         float gray_mean = static_cast<float>(mean(gray_img)[0]);
 
-        std::vector<Mat> channels(3);
+		int ch = img.channels();
+        std::vector<Mat> channels(ch);
         split(img, channels);
 
-        for(int i = 0; i < 3; i++) {
+        for(int i = 0; i < ch; i++) {
             float global = color_adapt * static_cast<float>(chan_mean[i]) + (1.0f - color_adapt) * gray_mean;
             Mat adapt = color_adapt * channels[i] + (1.0f - color_adapt) * gray_img;
             adapt = light_adapt * adapt + (1.0f - light_adapt) * global;
@@ -395,13 +417,19 @@ public:
 
         Mat src = _src.getMat();
         CV_Assert(!src.empty());
-        _dst.create(src.size(), CV_32FC3);
+		if (src.channels() == 1)
+			_dst.create(src.size(), CV_32FC1);
+		else
+			_dst.create(src.size(), CV_32FC3);
         Mat img = _dst.getMat();
         Ptr<Tonemap> linear = createTonemap(1.0f);
         linear->process(src, img);
 
         Mat gray_img;
-        cvtColor(img, gray_img, COLOR_RGB2GRAY);
+		if (img.channels() == 1)
+			gray_img = img;
+		else
+			cvtColor(img, gray_img, COLOR_RGB2GRAY);
         Mat log_img;
         log_(gray_img, log_img);
 

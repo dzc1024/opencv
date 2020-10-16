@@ -88,9 +88,10 @@ Mat RobertsonWeights()
 
 void mapLuminance(Mat src, Mat dst, Mat lum, Mat new_lum, float saturation)
 {
-    std::vector<Mat> channels(3);
+	int ch = src.channels();
+    std::vector<Mat> channels(ch);
     split(src, channels);
-    for(int i = 0; i < 3; i++) {
+    for(int i = 0; i < ch; i++) {
         channels[i] = channels[i].mul(1.0f / lum);
         pow(channels[i], saturation, channels[i]);
         channels[i] = channels[i].mul(new_lum);

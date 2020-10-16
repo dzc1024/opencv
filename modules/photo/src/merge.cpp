@@ -321,6 +321,8 @@ public:
         CV_Assert(images[0].depth() == CV_8U);
 
         int channels = images[0].channels();
+		if (channels == 1)
+			cvtColor(weight, weight, COLOR_RGB2GRAY);
         int CV_32FCC = CV_MAKETYPE(CV_32F, channels);
 
         dst.create(images[0].size(), CV_32FCC);

@@ -79,7 +79,10 @@ public:
         size_t pivot = src.size() / 2;
         dst[pivot] = src[pivot];
         Mat gray_base;
-        cvtColor(src[pivot], gray_base, COLOR_RGB2GRAY);
+		if (src[pivot].channels() == 1)
+			gray_base = src[pivot];
+		else
+			cvtColor(src[pivot], gray_base, COLOR_RGB2GRAY);
         std::vector<Point> shifts;
 
         for(size_t i = 0; i < src.size(); i++) {
@@ -88,7 +91,10 @@ public:
                 continue;
             }
             Mat gray;
-            cvtColor(src[i], gray, COLOR_RGB2GRAY);
+			if (src[i].channels() == 1)
+				gray = src[i];
+			else
+				cvtColor(src[i], gray, COLOR_RGB2GRAY);
             Point shift = calculateShift(gray_base, gray);
             shifts.push_back(shift);
             shiftMat(src[i], dst[i], shift);
