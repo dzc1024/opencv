@@ -206,7 +206,6 @@ void GMM::addSample(int ci, const double color)
 
 void GMM::endLearning()
 {
-	CV_Assert(totalSampleCount > 0);
     for( int ci = 0; ci < componentsCount; ci++ )
     {
         int n = sampleCounts[ci];
@@ -214,6 +213,7 @@ void GMM::endLearning()
             coefs[ci] = 0;
         else
         {
+			CV_Assert(totalSampleCount > 0);
 			double inv_n = 1.0 / n;
             coefs[ci] = (double)n/totalSampleCount;
 
