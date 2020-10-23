@@ -206,6 +206,7 @@ void GMM::addSample(int ci, const double color)
 
 void GMM::endLearning()
 {
+	CV_Assert(totalSampleCount > 0);
     const double variance = 0.01;
     for( int ci = 0; ci < componentsCount; ci++ )
     {
