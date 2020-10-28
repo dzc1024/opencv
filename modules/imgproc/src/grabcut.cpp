@@ -309,29 +309,31 @@ static double calcBeta( const Mat& img )
 static double calcBeta8u(const Mat& img)
 {
 	double beta = 0;
+	const uchar *pImg;
 	for (int y = 0; y < img.rows; y++)
 	{
+		pImg = img.ptr<uchar>(y);
 		for (int x = 0; x < img.cols; x++)
 		{
-			double color = img.at<uchar>(y, x);
+			double color = pImg[x];
 			if (x > 0) // left
 			{
-				double diff = color - (double)img.at<uchar>(y, x - 1);
+				double diff = color - (double)pImg[x - 1];
 				beta += diff * diff;
 			}
 			if (y > 0 && x > 0) // upleft
 			{
-				double diff = color - (double)img.at<uchar>(y - 1, x - 1);
+				double diff = color - (double)pImg[x - 1 - img.step];
 				beta += diff * diff;
 			}
 			if (y > 0) // up
 			{
-				double diff = color - (double)img.at<uchar>(y - 1, x);
+				double diff = color - (double)pImg[x - img.step];
 				beta += diff * diff;
 			}
 			if (y > 0 && x < img.cols - 1) // upright
 			{
-				double diff = color - (double)img.at<uchar>(y - 1, x + 1);
+				double diff = color - (double)pImg[x + 1 - img.step];
 				beta += diff * diff;
 			}
 		}
@@ -399,39 +401,46 @@ static void calcNWeights8u(const Mat& img, Mat& leftW, Mat& upleftW, Mat& upW, M
 	upleftW.create(img.rows, img.cols, CV_64FC1);
 	upW.create(img.rows, img.cols, CV_64FC1);
 	uprightW.create(img.rows, img.cols, CV_64FC1);
+	double *pLeftW, *pUpLeftW, *pUpW, *pUpRight;
+	const uchar *pImg;
 	for (int y = 0; y < img.rows; y++)
 	{
+		pImg = img.ptr<uchar>(y);
+		pLeftW = leftW.ptr<double>(y);
+		pUpLeftW = upleftW.ptr<double>(y);
+		pUpW = upW.ptr<double>(y);
+		pUpRight = uprightW.ptr<double>(y);
 		for (int x = 0; x < img.cols; x++)
 		{
-			double color = img.at<uchar>(y, x);
+			double color = pImg[x];
 			if (x - 1 >= 0) // left
 			{
-				double diff = color - (double)img.at<uchar>(y, x - 1);
-				leftW.at<double>(y, x) = gamma * exp(-beta * diff * diff);
+				double diff = color - (double)pImg[x - 1];
+				pLeftW[x] = gamma * exp(-beta * diff * diff);
 			}
 			else
-				leftW.at<double>(y, x) = 0;
+				pLeftW[x] = 0;
 			if (x - 1 >= 0 && y - 1 >= 0) // upleft
 			{
-				double diff = color - (double)img.at<uchar>(y - 1, x - 1);
-				upleftW.at<double>(y, x) = gammaDivSqrt2 * exp(-beta * diff * diff);
+				double diff = color - (double)pImg[x - 1 - img.step];
+				pUpLeftW[x] = gammaDivSqrt2 * exp(-beta * diff * diff);
 			}
 			else
-				upleftW.at<double>(y, x) = 0;
+				pUpLeftW[x] = 0;
 			if (y - 1 >= 0) // up
 			{
-				double diff = color - (double)img.at<uchar>(y - 1, x);
-				upW.at<double>(y, x) = gamma * exp(-beta * diff * diff);
+				double diff = color - (double)pImg[x - img.step];
+				pUpW[x] = gamma * exp(-beta * diff * diff);
 			}
 			else
-				upW.at<double>(y, x) = 0;
+				pUpW[x] = 0;
 			if (x + 1 < img.cols && y - 1 >= 0) // upright
 			{
-				double diff = color - (double)img.at<uchar>(y - 1, x + 1);
-				uprightW.at<double>(y, x) = gammaDivSqrt2 * exp(-beta * diff * diff);
+				double diff = color - (double)pImg[x + 1 - img.step];
+				pUpRight[x] = gammaDivSqrt2 * exp(-beta * diff * diff);
 			}
 			else
-				uprightW.at<double>(y, x) = 0;
+				pUpRight[x] = 0;
 		}
 	}
 }
@@ -671,7 +680,7 @@ void cv::grabCut( InputArray _img, InputOutputArray _mask, Rect rect,
     if( img.empty() )
         CV_Error( CV_StsBadArg, "image is empty" );
 	int channels = img.channels();
-	if (channels != 1 || channels != 3)
+	if(channels != 1 && channels != 3)
 		CV_Error(CV_BadDepth, "input image depth is not supported by the function");
 
     GMM bgdGMM( bgdModel ), fgdGMM( fgdModel );
