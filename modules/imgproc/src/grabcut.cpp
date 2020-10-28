@@ -671,6 +671,9 @@ void cv::grabCut( InputArray _img, InputOutputArray _mask, Rect rect,
     if( img.empty() )
         CV_Error( CV_StsBadArg, "image is empty" );
 	int channels = img.channels();
+	if (channels != 1 || channels != 3)
+		CV_Error(CV_BadDepth, "input image depth is not supported by the function");
+
     GMM bgdGMM( bgdModel ), fgdGMM( fgdModel );
     Mat compIdxs( img.size(), CV_32SC1 );
 
